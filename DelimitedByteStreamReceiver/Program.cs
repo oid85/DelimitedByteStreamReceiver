@@ -3,9 +3,12 @@
     static void Main()
     {
         // Создадим случайный массив длины больше, чем 255 (чтобы как минимум две части у нас были)
-        byte[] bytes = GenerateRandomByteArray(500);
-        const byte delimiter = 127;
+        byte[] bytes = GenerateRandomByteArray(100);
+        byte delimiter = bytes[25]; // Разделитель - элемент массива с индексом 100
         int partNumber = 0;
+
+        Console.WriteLine($"Input message: {String.Join(',', bytes)}");
+        Console.WriteLine($"Delimiter is: {delimiter}");
 
         // Читаем входной поток
         using var stream = new MemoryStream(bytes);
@@ -21,7 +24,7 @@
 
             partNumber++;
 
-            Console.WriteLine($"Received message (part number {partNumber}): {BitConverter.ToString(message)}");
+            Console.WriteLine($"Received message (part number {partNumber}): {String.Join(',', message)}");
         }
     }
 
