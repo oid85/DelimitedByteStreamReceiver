@@ -1,23 +1,27 @@
 ﻿class Program
 {
-    static void Main()
+    static async Task Main()
     {
         // Создадим случайный массив длины больше, чем 255 (чтобы как минимум две части у нас были)
         byte[] bytes = GenerateRandomByteArray(100);
         byte delimiter = bytes[25]; // Разделитель - элемент массива с индексом 100
-        int partNumber = 0;
+        int partNumber = 0; // Номер пакеты (для отображения результата)
 
         Console.WriteLine($"Input message: {String.Join(',', bytes)}");
         Console.WriteLine($"Delimiter is: {delimiter}");
 
+        CancellationTokenSource cancelTokenSource = new();
+        CancellationToken cancellationToken = cancelTokenSource.Token;
+
         // Читаем входной поток
         using var stream = new MemoryStream(bytes);
 
-        var reader = new MessageReader();
+        var reader = new CustomStreamReader();
 
-        while (true)
+        // Пока не встретится конец потока
+        while (stream.ReadByte() != -1 && !cancellationToken.IsCancellationRequested)
         {
-            byte[] message = reader.ReadMessage(stream, delimiter);
+            byte[] message = await reader.ReadMessageAsync(stream, delimiter, cancellationToken);
 
             if (message.Length == 0)
                 break;

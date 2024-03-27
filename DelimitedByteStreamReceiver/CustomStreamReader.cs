@@ -1,13 +1,13 @@
 ﻿/// <summary>
 /// Класс, с методами для работы с байтовым потоком
 /// </summary>
-public class MessageReader
+public class CustomStreamReader
 {
     /// <summary>
     /// Чтение потока, пока не встретится разделитель
     /// </summary>
     /// <param name="delimiter">Байт разделитель</param>
-    public byte[] ReadMessage(Stream stream, byte delimiter)
+    public async Task<byte[]> ReadMessageAsync(Stream stream, byte delimiter, CancellationToken cancellationToken)
     {
         try
         {
@@ -15,13 +15,13 @@ public class MessageReader
             int currentByte;
 
             // Пока не встретится конец потока
-            while ((currentByte = stream.ReadByte()) != -1)
+            while ((currentByte = stream.ReadByte()) != -1 && !cancellationToken.IsCancellationRequested)
             {
                 // Если встретился разделитель, то прерываемся
                 if (currentByte == delimiter)
                     break;
 
-                messageBuffer.WriteByte((byte)currentByte);
+                await messageBuffer.WriteAsync(new byte[] { (byte) currentByte }, cancellationToken);
             }
 
             var result = messageBuffer.ToArray();
